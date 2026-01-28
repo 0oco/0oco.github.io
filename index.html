@@ -11,17 +11,34 @@
         :root { --primary: #f5c518; --bg: #0a0a0a; --card-bg: #141414; --text: #fff; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
         
+        /* Navbar */
         nav { background: #000; padding: 10px 5%; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
         .nav-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
         .logo { font-size: 24px; font-weight: 900; color: var(--primary); cursor: pointer; text-decoration: none; display: inline-block; }
         .search-box { background: #222; border-radius: 20px; padding: 5px 15px; width: 100%; max-width: 250px; display: flex; border: 1px solid #333; }
         .search-box input { background: none; border: none; color: #fff; outline: none; width: 100%; font-size: 14px; }
         
-        .tabs { display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #222; }
+        /* Reset Button Style untuk Tabs agar tidak ada kotak putih */
+        .tabs { display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid #222; padding-bottom: 2px; }
         .tabs::-webkit-scrollbar { display: none; }
-        .tab-item { cursor: pointer; color: #bbb; font-weight: bold; font-size: 13px; text-transform: uppercase; padding: 10px 0; white-space: nowrap; border-bottom: 2px solid transparent; transition: 0.3s; }
+        
+        .tab-item { 
+            background: none; 
+            border: none; 
+            border-bottom: 2px solid transparent; 
+            cursor: pointer; 
+            color: #bbb; 
+            font-weight: bold; 
+            font-size: 13px; 
+            text-transform: uppercase; 
+            padding: 10px 5px; 
+            white-space: nowrap; 
+            transition: 0.3s;
+            outline: none;
+        }
         .tab-item.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
 
+        /* Main Content */
         main.container { padding: 20px 5%; min-height: 80vh; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; }
         .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid #222; transition: 0.3s; position: relative; }
@@ -35,6 +52,7 @@
         .card-info { padding: 10px; font-size: 12px; text-align: center; font-weight: bold; line-height: 1.4; color: var(--text); }
         .year-text { color: #ccc; font-weight: normal; font-size: 11px; }
 
+        /* Modal Player */
         #playerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; overflow-y: auto; padding-bottom: 40px; }
         .modal-body { width: 95%; max-width: 1000px; margin: 20px auto; }
         
@@ -46,13 +64,12 @@
         
         .server-selection { margin-top: 15px; display: flex; align-items: center; gap: 10px; background: #111; padding: 12px; border-radius: 8px; border: 1px solid #333; }
         .btn { padding: 8px 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
-        .btn:active { transform: scale(0.95); }
         .btn-srv { background: #333; color: #fff; }
         .btn-srv.active { background: var(--primary); color: #000; }
         .btn-close { background: #ff4444; color: #fff; flex-shrink: 0; }
 
         .episode-section { margin-top: 20px; background: #111; padding: 15px; border-radius: 8px; border: 1px solid #222; }
-        .group-select { background: #222; color: var(--primary); padding: 10px; border: 1px solid #444; border-radius: 4px; font-size: 13px; cursor: pointer; font-weight: bold; width: 100%; max-width: 200px; outline: none; }
+        .group-select { background: #222; color: var(--primary); padding: 10px; border: 1px solid #444; border-radius: 4px; font-size: 13px; cursor: pointer; font-weight: bold; width: 100%; max-width: 210px; outline: none; margin-bottom: 10px; }
         .episode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; margin-top: 15px; }
         .ep-item { background: #222; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; font-size: 11px; border: 1px solid #333; color: #fff; }
         .ep-item.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
@@ -185,8 +202,9 @@
         if (type === 'tv') {
             document.getElementById('episodeSection').style.display = 'block';
             const sTabs = document.getElementById('seasonTabs');
+            // FIX: Mengubah S menjadi Season
             sTabs.innerHTML = (data.seasons || []).filter(s => s.season_number > 0).map(s => 
-                `<button class="tab-item ${s.season_number==1?'active':''}" role="tab" onclick="loadEpisodes(${s.season_number}, this)">S${s.season_number}</button>`
+                `<button class="tab-item ${s.season_number==1?'active':''}" role="tab" onclick="loadEpisodes(${s.season_number}, this)">Season ${s.season_number}</button>`
             ).join('');
             loadEpisodes(1);
         } else { document.getElementById('episodeSection').style.display = 'none'; }
