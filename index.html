@@ -3,116 +3,248 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KuraStream - Auto Intelligent</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>LK21 PRO - Modern Player</title>
+    <style>
+        :root { --primary: #f5c518; --bg: #0a0a0a; --card-bg: #141414; --text: #fff; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; }
+        
+        /* Nav & Grid (Ringkas) */
+        nav { background: #000; padding: 10px 5%; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
+        .nav-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .logo { font-size: 24px; font-weight: 900; color: var(--primary); cursor: pointer; }
+        .search-box { background: #222; border-radius: 20px; padding: 5px 15px; width: 100%; max-width: 250px; display: flex; }
+        .search-box input { background: none; border: none; color: #fff; outline: none; width: 100%; }
+        .tabs { display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; }
+        .tab-item { cursor: pointer; color: #888; font-weight: bold; font-size: 13px; text-transform: uppercase; padding: 5px 0; }
+        .tab-item.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
+        .container { padding: 20px 5%; min-height: 80vh; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; }
+
+        /* Card UI */
+        .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid #222; transition: 0.3s; position: relative; }
+        .card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
+        .badge { position: absolute; top: 8px; left: 8px; padding: 3px 6px; border-radius: 4px; font-size: 9px; font-weight: 900; }
+        .badge-movie { background: #e50914; color: white; }
+        .badge-tv { background: #0073e6; color: white; }
+        .rating-tag { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.8); color: var(--primary); padding: 3px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; border: 1px solid var(--primary); }
+        .card-info { padding: 10px; font-size: 12px; text-align: center; font-weight: bold; }
+        .year-text { color: #888; font-weight: normal; font-size: 11px; }
+
+        /* MODAL PLAYER RE-LAYOUT */
+        #playerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; overflow-y: auto; }
+        .modal-body { width: 95%; max-width: 1000px; margin: 20px auto; }
+        
+        .video-container { position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 8px 8px 0 0; overflow: hidden; border: 1px solid #444; border-bottom: none; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
+        /* SERVER BAR DI BAWAH VIDEO */
+        .server-bar { background: #1a1a1a; padding: 15px; border: 1px solid #444; border-radius: 0 0 8px 8px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+        .server-label { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; margin-right: 5px; }
+        
+        .btn { padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
+        .btn-srv { background: #333; color: #fff; }
+        .btn-srv.active { background: var(--primary); color: #000; }
+        .btn-close { background: #ff4444; color: #fff; margin-left: auto; }
+
+        .info-section { margin-top: 15px; }
+        .episode-section { margin-top: 20px; background: #111; padding: 15px; border-radius: 8px; border: 1px solid #222; }
+        .season-tabs { display: flex; gap: 10px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
+        .season-btn { background: #222; color: #fff; border: 1px solid #444; padding: 6px 12px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+        .season-btn.active { border-color: var(--primary); color: var(--primary); }
+        .episode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; }
+        .ep-item { background: #222; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; font-size: 11px; border: 1px solid #333; }
+        .ep-item.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
+
+        .load-more-container { text-align: center; margin: 40px 0; }
+        .btn-load { background: transparent; color: var(--primary); border: 2px solid var(--primary); padding: 10px 30px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        footer { background: #000; color: #666; padding: 30px; text-align: center; border-top: 1px solid #222; }
+    </style>
 </head>
-<body class="bg-[#0b0c10] text-gray-300">
+<body>
 
-    <nav class="p-6 bg-[#1f2833] shadow-2xl">
-        <div class="container mx-auto text-center">
-            <h1 class="text-3xl font-black text-[#66fcf1] mb-2">KURA<span class="text-white">INTEL</span></h1>
-            <p class="text-xs text-gray-400 mb-6">Sistem akan otomatis mencoba berbagai format API</p>
-            
-            <div class="flex flex-col md:flex-row max-w-3xl mx-auto gap-2 bg-[#0b0c10] p-2 rounded-xl border border-[#45a29e]">
-                <input id="urlInput" type="text" 
-                    placeholder="Tempel URL Kuramanime (Contoh: https://v11.kuramanime.tel/...)" 
-                    class="bg-transparent border-none w-full p-3 outline-none text-white text-sm">
-                <button onclick="smartSearch()" class="bg-[#45a29e] hover:bg-[#66fcf1] text-[#0b0c10] font-bold px-8 py-3 rounded-lg transition-all">MULAI PROSES</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mx-auto mt-10 p-4">
-        <div id="loader" class="hidden text-center text-[#66fcf1] mb-4">
-            <span id="loaderText">Mencoba Format 1...</span>
-        </div>
-        <div id="resultContainer" class="max-w-4xl mx-auto"></div>
+<nav>
+    <div class="nav-top">
+        <div class="logo" onclick="goHome()">LK21<span style="color:#fff">PRO</span></div>
+        <div class="search-box"><input type="text" id="searchInput" placeholder="Cari film atau donghua..." onkeypress="if(event.key==='Enter') search()"></div>
     </div>
+    <div class="tabs" id="navTabs">
+        <div class="tab-item active" onclick="switchTab('all', this)">Beranda</div>
+        <div class="tab-item" onclick="switchTab('movie', this)">Movies</div>
+        <div class="tab-item" onclick="switchTab('tv', this)">Series</div>
+        <div class="tab-item" onclick="switchTab('anime', this)">Anime</div>
+        <div class="tab-item" onclick="switchTab('donghua', this)">Donghua</div>
+    </div>
+</nav>
 
-    <script>
-        async function smartSearch() {
-            const rawUrl = document.getElementById('urlInput').value.trim();
-            const container = document.getElementById('resultContainer');
-            const loader = document.getElementById('loader');
-            const loaderText = document.getElementById('loaderText');
+<div class="container">
+    <h2 id="sectionTitle" style="font-size: 18px; margin-bottom: 20px; color: var(--primary);">Trending Sekarang</h2>
+    <div class="grid" id="mainGrid"></div>
+    <div class="load-more-container"><button id="btnLoadMore" class="btn-load" onclick="loadMore()">MUAT LEBIH BANYAK</button></div>
+</div>
 
-            if (!rawUrl) return;
+<div id="playerModal">
+    <div class="modal-body">
+        <div class="video-container">
+            <iframe id="videoIframe" allowfullscreen sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin"></iframe>
+        </div>
+        
+        <div class="server-bar">
+            <span class="server-label">Ganti Server:</span>
+            <button class="btn btn-srv active" id="bSrv1" onclick="setServer(1)">Server 1</button>
+            <button class="btn btn-srv" id="bSrv2" onclick="setServer(2)">Server 2 (2Embed)</button>
+            <button class="btn btn-close" onclick="closePlayer()">TUTUP</button>
+        </div>
 
-            let pathOnly = "";
-            let slugOnly = "";
+        <div class="info-section">
+            <h3 id="pTitle" style="color: var(--primary); margin: 10px 0;"></h3>
+            <p id="pDesc" style="font-size: 13px; color: #aaa; line-height: 1.5;"></p>
+        </div>
 
-            try {
-                const urlObj = new URL(rawUrl);
-                pathOnly = urlObj.pathname.startsWith('/') ? urlObj.pathname.substring(1) : urlObj.pathname;
-                slugOnly = pathOnly.replace(/^anime\//, "");
-            } catch (e) {
-                alert("URL tidak valid!");
-                return;
-            }
+        <div id="episodeSection" class="episode-section" style="display:none;">
+            <div id="seasonTabs" class="season-tabs"></div>
+            <div id="groupDiv" style="display:none; margin-bottom:15px;">
+                <select id="groupSelect" onchange="renderGrid()" style="background:#222; color:#fff; padding:8px; border:1px solid var(--primary); border-radius:4px;"></select>
+            </div>
+            <div id="episodeGrid" class="episode-grid"></div>
+        </div>
+    </div>
+</div>
 
-            container.innerHTML = "";
-            loader.classList.remove('hidden');
+<footer><p>&copy; 2026 LK21 PRO. All Rights Reserved.</p></footer>
 
-            // --- PERCOBAAN 1: Format Slug Saja (1583/one-piece) ---
-            loaderText.innerText = "Mencoba Format 1 (Slug)...";
-            let data = await fetchFromSanka(slugOnly);
+<script>
+    const API_KEY = 'db838c8dc572f75825a043e86146b8c4';
+    let curTMDB = '', curIMDB = '', curType = '', curS = 1, curE = 1, allEp = [], curServer = 1;
+    let currentPage = 1, currentCategory = 'all', isSearchMode = false, currentQuery = '';
 
-            // --- PERCOBAAN 2: Jika Gagal, Coba Format Path Lengkap (anime/1583/one-piece) ---
-            if (!data) {
-                loaderText.innerText = "Format 1 gagal, mencoba Format 2 (Full Path)...";
-                data = await fetchFromSanka(pathOnly);
-            }
+    function goHome() { document.getElementById('searchInput').value = ''; isSearchMode = false; switchTab('all', document.querySelector('.tab-item')); }
 
-            loader.classList.add('hidden');
+    async function search() {
+        currentQuery = document.getElementById('searchInput').value;
+        if (!currentQuery) return;
+        isSearchMode = true; currentPage = 1;
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.getElementById('sectionTitle').innerText = `Hasil: "${currentQuery}"`;
+        document.getElementById('mainGrid').innerHTML = '';
+        await fetchResults();
+    }
 
-            if (data) {
-                renderUI(data);
-            } else {
-                container.innerHTML = `<div class="text-center p-10 bg-red-900/10 border border-red-500 rounded-xl text-red-500">
-                    Gagal menarik data dari semua format API. <br> 
-                    <span class="text-xs text-gray-500 mt-2 block">Mungkin server Sankavollerei sedang down atau domain Kuramanime berubah.</span>
-                </div>`;
-            }
+    async function switchTab(type, el) {
+        isSearchMode = false; currentCategory = type; currentPage = 1;
+        document.querySelectorAll('.tab-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('sectionTitle').innerText = el.innerText + " Populer";
+        document.getElementById('mainGrid').innerHTML = '';
+        await fetchResults();
+    }
+
+    async function loadMore() {
+        currentPage++;
+        document.getElementById('btnLoadMore').innerText = "MENGAMBIL DATA...";
+        await fetchResults(true);
+        document.getElementById('btnLoadMore').innerText = "MUAT LEBIH BANYAK";
+    }
+
+    async function fetchResults(append = false) {
+        let url = '';
+        if (isSearchMode) url = `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
+        else {
+            if (currentCategory === 'all') url = `https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}&page=${currentPage}`;
+            else if (currentCategory === 'movie') url = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${currentPage}`;
+            else if (currentCategory === 'tv') url = `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&page=${currentPage}`;
+            else if (currentCategory === 'anime') url = `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&with_genres=16&with_keywords=210024&page=${currentPage}`;
+            else if (currentCategory === 'donghua') url = `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&with_genres=16&with_original_language=zh&page=${currentPage}`;
         }
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            const items = data.results.filter(m => m.poster_path && m.media_type !== 'person');
+            document.getElementById('btnLoadMore').style.display = (data.page >= data.total_pages) ? 'none' : 'inline-block';
+            render(items, append);
+        } catch (e) { console.error(e); }
+    }
 
-        async function fetchFromSanka(param) {
-            const proxy = "https://api.allorigins.win/get?url=";
-            const target = `https://www.sankavollerei.com/anime/kura/${param}`;
-            
-            try {
-                const response = await fetch(proxy + encodeURIComponent(target));
-                const json = await response.json();
-                if (!json.contents) return null;
-                
-                const result = JSON.parse(json.contents);
-                // Validasi apakah data yang kembali valid (bukan 404 atau error)
-                if (result && (result.title || result.data)) {
-                    return result.data || result;
-                }
-                return null;
-            } catch (e) {
-                return null;
+    function render(items, append) {
+        const grid = document.getElementById('mainGrid');
+        const html = items.map(m => {
+            const isMovie = m.media_type ? (m.media_type === 'movie') : (!!m.title);
+            const date = isMovie ? m.release_date : m.first_air_date;
+            const year = date ? date.split('-')[0] : 'N/A';
+            const rating = m.vote_average ? m.vote_average.toFixed(1) : '0';
+            return `<div class="card" onclick="openPlayer('${m.id}', '${isMovie?'movie':'tv'}', '${(m.title || m.name).replace(/'/g, "")}', '${year}')">
+                <div class="badge ${isMovie?'badge-movie':'badge-tv'}">${isMovie?'MOVIE':'TV SHOW'}</div>
+                <div class="rating-tag">⭐ ${rating}</div>
+                <img src="https://image.tmdb.org/t/p/w500${m.poster_path}" alt="p">
+                <div class="card-info">${m.title || m.name}<br><span class="year-text">(${year})</span></div>
+            </div>`;
+        }).join('');
+        if (append) grid.innerHTML += html; else grid.innerHTML = html;
+    }
+
+    async function openPlayer(id, type, title, year) {
+        curTMDB = id; curType = type; curS = 1; curE = 1;
+        document.getElementById('playerModal').style.display = 'block';
+        document.getElementById('pTitle').innerText = `${title} (${year})`;
+        
+        // Ambil Deskripsi & External IDs
+        const detailRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&append_to_response=external_ids`);
+        const data = await detailRes.json();
+        document.getElementById('pDesc').innerText = data.overview || "Tidak ada deskripsi tersedia.";
+        curIMDB = data.external_ids ? data.external_ids.imdb_id : '';
+
+        if (type === 'tv') {
+            document.getElementById('episodeSection').style.display = 'block';
+            renderSeasons(data.seasons);
+        } else { document.getElementById('episodeSection').style.display = 'none'; }
+        setServer(1);
+    }
+
+    function renderSeasons(seasons) {
+        const valid = seasons.filter(s => s.season_number > 0);
+        document.getElementById('seasonTabs').innerHTML = valid.map(s => `<button class="season-btn ${s.season_number === 1 ? 'active' : ''}" onclick="loadEpisodes(${s.season_number}, this)">Season ${s.season_number}</button>`).join('');
+        loadEpisodes(1);
+    }
+
+    async function loadEpisodes(sNum, btn = null) {
+        curS = sNum; if(btn) { document.querySelectorAll('.season-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+        const res = await fetch(`https://api.themoviedb.org/3/tv/${curTMDB}/season/${sNum}?api_key=${API_KEY}`);
+        const data = await res.json(); allEp = data.episodes;
+        const gSel = document.getElementById('groupSelect');
+        if (allEp.length > 12) {
+            document.getElementById('groupDiv').style.display = 'block'; gSel.innerHTML = '';
+            for (let i = 0; i < allEp.length; i += 12) {
+                const end = Math.min(i + 12, allEp.length);
+                gSel.innerHTML += `<option value="${i}">Episode ${i + 1} - ${end}</option>`;
             }
-        }
+        } else { document.getElementById('groupDiv').style.display = 'none'; }
+        renderGrid();
+    }
 
-        function renderUI(data) {
-            const container = document.getElementById('resultContainer');
-            container.innerHTML = `
-                <div class="bg-[#1f2833] p-8 rounded-2xl border border-[#45a29e] flex flex-col md:flex-row gap-8 shadow-2xl">
-                    <img src="${data.thumbnail || data.image}" class="w-full md:w-64 rounded-xl object-cover border border-[#45a29e]/30">
-                    <div class="flex-1">
-                        <h2 class="text-3xl font-bold text-white mb-2">${data.title}</h2>
-                        <div class="flex gap-2 mb-4">
-                            <span class="text-[10px] bg-[#45a29e] text-black font-bold px-2 py-1 rounded uppercase tracking-wider">Success</span>
-                        </div>
-                        <p class="text-sm text-gray-400 bg-black/30 p-4 rounded-lg leading-relaxed mb-6">
-                            ${data.description || 'Deskripsi tidak ditemukan.'}
-                        </p>
-                        <button class="w-full bg-[#66fcf1] text-black font-black py-4 rounded-xl hover:shadow-[0_0_20px_rgba(102,252,241,0.5)] transition-all">TONTON SEKARANG</button>
-                    </div>
-                </div>
-            `;
+    function renderGrid() {
+        const start = parseInt(document.getElementById('groupSelect').value || 0);
+        const show = allEp.slice(start, start + 12);
+        document.getElementById('episodeGrid').innerHTML = show.map(ep => `<div class="ep-item ${ep.episode_number == curE ? 'active' : ''}" onclick="playEp(${ep.episode_number}, this)">EP ${ep.episode_number}</div>`).join('');
+    }
+
+    function playEp(eNum, el) { curE = eNum; document.querySelectorAll('.ep-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); setServer(curServer); }
+
+    function setServer(n) {
+        curServer = n; 
+        document.getElementById('bSrv1').classList.toggle('active', n === 1);
+        document.getElementById('bSrv2').classList.toggle('active', n === 2);
+        const ifr = document.getElementById('videoIframe');
+        
+        if (n === 1) {
+            ifr.src = curType === 'movie' ? `https://godriveplayer.com/player.php?imdb=${curIMDB}` : `https://godriveplayer.com/player.php?type=series&tmdb=${curTMDB}&season=${curS}&episode=${curE}`;
+        } else {
+            ifr.src = curType === 'movie' ? `https://www.2embed.cc/embed/tmdb/movie?id=${curTMDB}` : `https://www.2embed.cc/embed/tmdb/tv?id=${curTMDB}&s=${curS}&e=${curE}`;
         }
-    </script>
+    }
+
+    function closePlayer() { document.getElementById('playerModal').style.display = 'none'; document.getElementById('videoIframe').src = ""; }
+
+    fetchResults();
+</script>
 </body>
 </html>
