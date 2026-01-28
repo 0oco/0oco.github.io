@@ -3,91 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KuraStream - Fast Load</title>
+    <title>KuraStream - Auto Intelligent</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#0b0c10] text-gray-300">
 
-    <nav class="p-4 bg-[#1f2833] shadow-2xl sticky top-0 z-50">
-        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <h1 class="text-2xl font-black text-[#66fcf1]">KURA<span class="text-white">CACHE</span></h1>
-            <div class="flex w-full md:w-1/2 bg-[#0b0c10] rounded-lg p-1 border border-[#45a29e]">
-                <input id="animeInput" type="text" placeholder="Masukkan slug (contoh: 123/naruto)..." class="bg-transparent border-none w-full p-2 outline-none text-white text-sm">
-                <button onclick="getAnime()" class="bg-[#45a29e] hover:bg-[#66fcf1] text-[#0b0c10] font-bold px-6 py-2 rounded-md">GET</button>
+    <nav class="p-6 bg-[#1f2833] shadow-2xl">
+        <div class="container mx-auto text-center">
+            <h1 class="text-3xl font-black text-[#66fcf1] mb-2">KURA<span class="text-white">INTEL</span></h1>
+            <p class="text-xs text-gray-400 mb-6">Sistem akan otomatis mencoba berbagai format API</p>
+            
+            <div class="flex flex-col md:flex-row max-w-3xl mx-auto gap-2 bg-[#0b0c10] p-2 rounded-xl border border-[#45a29e]">
+                <input id="urlInput" type="text" 
+                    placeholder="Tempel URL Kuramanime (Contoh: https://v11.kuramanime.tel/...)" 
+                    class="bg-transparent border-none w-full p-3 outline-none text-white text-sm">
+                <button onclick="smartSearch()" class="bg-[#45a29e] hover:bg-[#66fcf1] text-[#0b0c10] font-bold px-8 py-3 rounded-lg transition-all">MULAI PROSES</button>
             </div>
         </div>
     </nav>
 
     <div class="container mx-auto mt-10 p-4">
-        <div id="loading" class="hidden text-center text-[#66fcf1] mb-4">Mengkoneksikan...</div>
-        <div id="status" class="text-center text-xs text-gray-500 mb-4"></div>
+        <div id="loader" class="hidden text-center text-[#66fcf1] mb-4">
+            <span id="loaderText">Mencoba Format 1...</span>
+        </div>
         <div id="resultContainer" class="max-w-4xl mx-auto"></div>
     </div>
 
     <script>
-        async function getAnime() {
-            const slug = document.getElementById('animeInput').value.trim();
+        async function smartSearch() {
+            const rawUrl = document.getElementById('urlInput').value.trim();
             const container = document.getElementById('resultContainer');
-            const loader = document.getElementById('loading');
-            const status = document.getElementById('status');
-            
-            if (!slug) return alert("Masukkan slug anime!");
+            const loader = document.getElementById('loader');
+            const loaderText = document.getElementById('loaderText');
 
-            // 1. CEK CACHE TERLEBIH DAHULU (Sangat Cepat)
-            const cachedData = localStorage.getItem(slug);
-            if (cachedData) {
-                status.innerText = "Memuat dari cache lokal (Instan)...";
-                renderUI(JSON.parse(cachedData));
+            if (!rawUrl) return;
+
+            let pathOnly = "";
+            let slugOnly = "";
+
+            try {
+                const urlObj = new URL(rawUrl);
+                pathOnly = urlObj.pathname.startsWith('/') ? urlObj.pathname.substring(1) : urlObj.pathname;
+                slugOnly = pathOnly.replace(/^anime\//, "");
+            } catch (e) {
+                alert("URL tidak valid!");
                 return;
             }
 
-            // 2. JIKA TIDAK ADA DI CACHE, PANGGIL API (Proses Lama)
             container.innerHTML = "";
             loader.classList.remove('hidden');
-            status.innerText = "Mengambil data baru dari server (Mungkin agak lama)...";
 
-            const targetUrl = `https://www.sankavollerei.com/anime/kura/${slug}`;
-            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+            // --- PERCOBAAN 1: Format Slug Saja (1583/one-piece) ---
+            loaderText.innerText = "Mencoba Format 1 (Slug)...";
+            let data = await fetchFromSanka(slugOnly);
 
+            // --- PERCOBAAN 2: Jika Gagal, Coba Format Path Lengkap (anime/1583/one-piece) ---
+            if (!data) {
+                loaderText.innerText = "Format 1 gagal, mencoba Format 2 (Full Path)...";
+                data = await fetchFromSanka(pathOnly);
+            }
+
+            loader.classList.add('hidden');
+
+            if (data) {
+                renderUI(data);
+            } else {
+                container.innerHTML = `<div class="text-center p-10 bg-red-900/10 border border-red-500 rounded-xl text-red-500">
+                    Gagal menarik data dari semua format API. <br> 
+                    <span class="text-xs text-gray-500 mt-2 block">Mungkin server Sankavollerei sedang down atau domain Kuramanime berubah.</span>
+                </div>`;
+            }
+        }
+
+        async function fetchFromSanka(param) {
+            const proxy = "https://api.allorigins.win/get?url=";
+            const target = `https://www.sankavollerei.com/anime/kura/${param}`;
+            
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(proxy + encodeURIComponent(target));
                 const json = await response.json();
-                const data = JSON.parse(json.contents);
-
-                if (data) {
-                    // Simpan hasil ke Cache agar pencarian berikutnya instan
-                    localStorage.setItem(slug, JSON.stringify(data));
-                    renderUI(data);
+                if (!json.contents) return null;
+                
+                const result = JSON.parse(json.contents);
+                // Validasi apakah data yang kembali valid (bukan 404 atau error)
+                if (result && (result.title || result.data)) {
+                    return result.data || result;
                 }
-            } catch (error) {
-                console.error(error);
-                status.innerText = "Gagal memuat data.";
-            } finally {
-                loader.classList.add('hidden');
+                return null;
+            } catch (e) {
+                return null;
             }
         }
 
         function renderUI(data) {
             const container = document.getElementById('resultContainer');
             container.innerHTML = `
-                <div class="bg-[#1f2833] p-6 rounded-xl border border-[#45a29e] flex flex-col md:flex-row gap-8 animate-fadeIn">
-                    <img src="${data.thumbnail || data.image || 'https://via.placeholder.com/300x450'}" class="w-full md:w-64 rounded-lg shadow-lg object-cover">
+                <div class="bg-[#1f2833] p-8 rounded-2xl border border-[#45a29e] flex flex-col md:flex-row gap-8 shadow-2xl">
+                    <img src="${data.thumbnail || data.image}" class="w-full md:w-64 rounded-xl object-cover border border-[#45a29e]/30">
                     <div class="flex-1">
                         <h2 class="text-3xl font-bold text-white mb-2">${data.title}</h2>
-                        <p class="text-[#66fcf1] mb-4">${data.status || 'Ongoing'}</p>
-                        <div class="bg-[#0b0c10] p-4 rounded-lg">
-                            <p class="text-sm leading-relaxed">${data.description || 'Tidak ada deskripsi.'}</p>
+                        <div class="flex gap-2 mb-4">
+                            <span class="text-[10px] bg-[#45a29e] text-black font-bold px-2 py-1 rounded uppercase tracking-wider">Success</span>
                         </div>
-                        <button class="w-full mt-6 bg-[#66fcf1] text-black font-bold py-3 rounded-md hover:scale-105 transition">TONTON SEKARANG</button>
+                        <p class="text-sm text-gray-400 bg-black/30 p-4 rounded-lg leading-relaxed mb-6">
+                            ${data.description || 'Deskripsi tidak ditemukan.'}
+                        </p>
+                        <button class="w-full bg-[#66fcf1] text-black font-black py-4 rounded-xl hover:shadow-[0_0_20px_rgba(102,252,241,0.5)] transition-all">TONTON SEKARANG</button>
                     </div>
                 </div>
             `;
         }
     </script>
-
-    <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
-    </style>
 </body>
 </html>
