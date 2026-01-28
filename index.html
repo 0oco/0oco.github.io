@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KuraStream - Fast Load</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#0b0c10] text-gray-300">
+
+    <nav class="p-4 bg-[#1f2833] shadow-2xl sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-2xl font-black text-[#66fcf1]">KURA<span class="text-white">CACHE</span></h1>
+            <div class="flex w-full md:w-1/2 bg-[#0b0c10] rounded-lg p-1 border border-[#45a29e]">
+                <input id="animeInput" type="text" placeholder="Masukkan slug (contoh: 123/naruto)..." class="bg-transparent border-none w-full p-2 outline-none text-white text-sm">
+                <button onclick="getAnime()" class="bg-[#45a29e] hover:bg-[#66fcf1] text-[#0b0c10] font-bold px-6 py-2 rounded-md">GET</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-10 p-4">
+        <div id="loading" class="hidden text-center text-[#66fcf1] mb-4">Mengkoneksikan...</div>
+        <div id="status" class="text-center text-xs text-gray-500 mb-4"></div>
+        <div id="resultContainer" class="max-w-4xl mx-auto"></div>
+    </div>
+
+    <script>
+        async function getAnime() {
+            const slug = document.getElementById('animeInput').value.trim();
+            const container = document.getElementById('resultContainer');
+            const loader = document.getElementById('loading');
+            const status = document.getElementById('status');
+            
+            if (!slug) return alert("Masukkan slug anime!");
+
+            // 1. CEK CACHE TERLEBIH DAHULU (Sangat Cepat)
+            const cachedData = localStorage.getItem(slug);
+            if (cachedData) {
+                status.innerText = "Memuat dari cache lokal (Instan)...";
+                renderUI(JSON.parse(cachedData));
+                return;
+            }
+
+            // 2. JIKA TIDAK ADA DI CACHE, PANGGIL API (Proses Lama)
+            container.innerHTML = "";
+            loader.classList.remove('hidden');
+            status.innerText = "Mengambil data baru dari server (Mungkin agak lama)...";
+
+            const targetUrl = `https://www.sankavollerei.com/anime/kura/${slug}`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+                const json = await response.json();
+                const data = JSON.parse(json.contents);
+
+                if (data) {
+                    // Simpan hasil ke Cache agar pencarian berikutnya instan
+                    localStorage.setItem(slug, JSON.stringify(data));
+                    renderUI(data);
+                }
+            } catch (error) {
+                console.error(error);
+                status.innerText = "Gagal memuat data.";
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        function renderUI(data) {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = `
+                <div class="bg-[#1f2833] p-6 rounded-xl border border-[#45a29e] flex flex-col md:flex-row gap-8 animate-fadeIn">
+                    <img src="${data.thumbnail || data.image || 'https://via.placeholder.com/300x450'}" class="w-full md:w-64 rounded-lg shadow-lg object-cover">
+                    <div class="flex-1">
+                        <h2 class="text-3xl font-bold text-white mb-2">${data.title}</h2>
+                        <p class="text-[#66fcf1] mb-4">${data.status || 'Ongoing'}</p>
+                        <div class="bg-[#0b0c10] p-4 rounded-lg">
+                            <p class="text-sm leading-relaxed">${data.description || 'Tidak ada deskripsi.'}</p>
+                        </div>
+                        <button class="w-full mt-6 bg-[#66fcf1] text-black font-bold py-3 rounded-md hover:scale-105 transition">TONTON SEKARANG</button>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+    </style>
+</body>
+</html>
