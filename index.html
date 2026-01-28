@@ -11,6 +11,7 @@
         :root { --primary: #f5c518; --bg: #0a0a0a; --card-bg: #141414; --text: #fff; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
         
+        /* Navbar */
         nav { background: #000; padding: 10px 5%; border-bottom: 1px solid #222; position: sticky; top: 0; z-index: 1000; }
         .nav-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
         .logo { font-size: 24px; font-weight: 900; color: var(--primary); cursor: pointer; text-decoration: none; }
@@ -18,10 +19,10 @@
         .search-box input { background: none; border: none; color: #fff; outline: none; width: 100%; font-size: 14px; }
         
         .tabs { display: flex; gap: 15px; overflow-x: auto; scrollbar-width: none; }
-        .tab-item { cursor: pointer; color: #bbb; /* FIX KONTRAS: Lebih terang dari #888 */ font-weight: bold; font-size: 13px; text-transform: uppercase; padding: 8px 0; white-space: nowrap; border-bottom: 2px solid transparent; }
+        .tab-item { cursor: pointer; color: #bbb; font-weight: bold; font-size: 13px; text-transform: uppercase; padding: 8px 0; white-space: nowrap; border-bottom: 2px solid transparent; transition: 0.3s; }
         .tab-item.active { color: var(--primary); border-bottom: 2px solid var(--primary); }
 
-        /* FIX AKSESIBILITAS: Gunakan Tag Main */
+        /* Main Content */
         main.container { padding: 20px 5%; min-height: 80vh; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; }
         .card { background: var(--card-bg); border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid #222; transition: 0.3s; position: relative; }
@@ -33,10 +34,30 @@
         .badge-tv { background: #0073e6; color: white; }
         .rating-tag { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.8); color: var(--primary); padding: 3px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; border: 1px solid var(--primary); z-index: 10; }
         .card-info { padding: 10px; font-size: 12px; text-align: center; font-weight: bold; line-height: 1.4; }
-        .year-text { color: #ccc; /* FIX KONTRAS */ font-weight: normal; font-size: 11px; }
+        .year-text { color: #ccc; font-weight: normal; font-size: 11px; }
 
+        /* MODAL FIX (Tombol Tutup di Kanan) */
         #playerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; overflow-y: auto; padding-bottom: 40px; }
         .modal-body { width: 95%; max-width: 1000px; margin: 20px auto; }
+        
+        .modal-top-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+            width: 100%; 
+        }
+        #pTitle { 
+            flex: 1; 
+            color: var(--primary); 
+            margin: 0; 
+            font-size: 18px; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            padding-right: 15px;
+        }
+
         .video-container { position: relative; width: 100%; padding-top: 56.25%; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; }
         .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         
@@ -44,10 +65,10 @@
         .btn { padding: 8px 15px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; font-size: 12px; }
         .btn-srv { background: #333; color: #fff; }
         .btn-srv.active { background: var(--primary); color: #000; }
-        .btn-close { background: #ff4444; color: #fff; }
+        .btn-close { background: #ff4444; color: #fff; flex-shrink: 0; }
 
         .episode-section { margin-top: 20px; background: #111; padding: 15px; border-radius: 8px; border: 1px solid #222; }
-        .group-select { background: #222; color: var(--primary); padding: 8px 12px; border: 1px solid #444; border-radius: 4px; font-size: 12px; cursor: pointer; }
+        .group-select { background: #222; color: var(--primary); padding: 8px 12px; border: 1px solid #444; border-radius: 4px; font-size: 12px; cursor: pointer; font-weight: bold; }
         .episode-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; margin-top: 15px; }
         .ep-item { background: #222; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; font-size: 11px; border: 1px solid #333; color: #fff; }
         .ep-item.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
@@ -62,7 +83,7 @@
     <div class="nav-top">
         <div class="logo" onclick="goHome()">LK21<span style="color:#fff">PRO</span></div>
         <div class="search-box">
-            <input type="text" id="searchInput" aria-label="Cari Film" placeholder="Cari film, series, donghua..." onkeypress="if(event.key==='Enter') search()">
+            <input type="text" id="searchInput" aria-label="Cari Konten" placeholder="Cari film, series, donghua..." onkeypress="if(event.key==='Enter') search()">
         </div>
     </div>
     <div class="tabs" role="tablist">
@@ -83,7 +104,7 @@
 <div id="playerModal" aria-hidden="true">
     <div class="modal-body">
         <div class="modal-top-bar">
-            <h2 id="pTitle" style="color: var(--primary); margin: 0; font-size: 18px;"></h2>
+            <h2 id="pTitle">Judul Memuat...</h2>
             <button class="btn btn-close" onclick="closePlayer()">TUTUP</button>
         </div>
         <div class="video-container">
@@ -93,11 +114,11 @@
             <button class="btn btn-srv active" id="bSrv1" onclick="setServer(1)">Server 1</button>
             <button class="btn btn-srv" id="bSrv2" onclick="setServer(2)">Server 2</button>
         </div>
-        <p id="pDesc" style="font-size: 14px; color: #ccc; margin-top: 15px; line-height: 1.6; background: #111; padding: 15px; border-radius: 8px;"></p>
+        <p id="pDesc" style="font-size: 14px; color: #ccc; margin-top: 15px; line-height: 1.6; background: #111; padding: 15px; border-radius: 8px; border: 1px solid #222;"></p>
         
         <div id="episodeSection" class="episode-section" style="display:none;">
-            <div id="seasonTabs" class="tabs" style="margin-bottom:15px;"></div>
-            <select id="groupSelect" class="group-select" aria-label="Pilih Grup Episode" onchange="renderEpisodeGrid()"></select>
+            <div id="seasonTabs" class="tabs" style="margin-bottom:15px; border-bottom:1px solid #333; padding-bottom:10px;"></div>
+            <select id="groupSelect" class="group-select" aria-label="Pilih Episode" onchange="renderEpisodeGrid()"></select>
             <div id="episodeGrid" class="episode-grid"></div>
         </div>
     </div>
@@ -114,6 +135,7 @@
         const val = document.getElementById('searchInput').value.trim();
         if (!val) return;
         currentQuery = val; isSearchMode = true; currentPage = 1;
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
         document.getElementById('sectionTitle').innerText = `Hasil Cari: ${val}`;
         document.getElementById('mainGrid').innerHTML = '';
         await fetchResults();
@@ -122,15 +144,17 @@
     async function fetchResults(append = false) {
         let url = "";
         const base = "https://api.themoviedb.org/3";
+        const lang = "language=en-US"; 
+        
         if (isSearchMode) {
-            url = `${base}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(currentQuery)}&language=en-US&page=${currentPage}`;
+            url = `${base}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(currentQuery)}&${lang}&page=${currentPage}`;
         } else {
             let ep = "/trending/all/week";
             if (currentCategory === 'movie') ep = "/discover/movie";
             if (currentCategory === 'tv') ep = "/discover/tv";
             if (currentCategory === 'anime') ep = "/discover/tv?with_genres=16&with_keywords=210024";
             if (currentCategory === 'donghua') ep = "/discover/tv?with_genres=16&with_original_language=zh";
-            url = `${base}${ep}${ep.includes('?') ? '&' : '?'}api_key=${API_KEY}&language=en-US&page=${currentPage}`;
+            url = `${base}${ep}${ep.includes('?') ? '&' : '?'}api_key=${API_KEY}&${lang}&page=${currentPage}`;
         }
 
         try {
@@ -142,8 +166,6 @@
                 const isMovie = m.title !== undefined || m.media_type === 'movie';
                 const title = isMovie ? (m.title || m.original_title) : (m.name || m.original_name);
                 const year = (isMovie ? (m.release_date || '') : (m.first_air_date || '')).split('-')[0] || 'N/A';
-                
-                // FIX: Menambahkan atribut ALT pada gambar
                 return `<div class="card" onclick="openPlayer('${m.id}', '${isMovie?'movie':'tv'}', '${title.replace(/'/g, "")}', '${year}')">
                     <div class="badge ${isMovie?'badge-movie':'badge-tv'}">${isMovie?'MOVIE':'TV'}</div>
                     <div class="rating-tag">⭐ ${m.vote_average.toFixed(1)}</div>
@@ -154,35 +176,42 @@
             
             if (append) document.getElementById('mainGrid').innerHTML += html; 
             else document.getElementById('mainGrid').innerHTML = html;
+            document.getElementById('btnLoadMore').style.display = data.page >= data.total_pages ? 'none' : 'block';
         } catch (e) { console.error(e); }
     }
 
     async function openPlayer(id, type, title, year) {
-        curTMDB = id; curType = type;
+        curTMDB = id; curType = type; curS = 1; curE = 1;
         document.getElementById('playerModal').style.display = 'block';
         document.getElementById('pTitle').innerText = `${title} (${year})`;
 
-        const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&append_to_response=external_ids&language=id-ID`);
-        const data = await res.json();
-        
-        let synopsis = data.overview;
-        if(!synopsis) {
-            const resEn = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=en-US`);
-            const dataEn = await resEn.json();
-            synopsis = dataEn.overview || "Sinopsis tidak tersedia.";
-        }
-        document.getElementById('pDesc').innerText = synopsis;
-        curIMDB = data.external_ids ? data.external_ids.imdb_id : '';
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&append_to_response=external_ids&language=id-ID`);
+            const data = await res.json();
+            let synopsis = data.overview;
+            if(!synopsis) {
+                const resEn = await fetch(`https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&language=en-US`);
+                const dataEn = await resEn.json();
+                synopsis = dataEn.overview || "Sinopsis tidak tersedia.";
+            }
+            document.getElementById('pDesc').innerText = synopsis;
+            curIMDB = data.external_ids ? data.external_ids.imdb_id : '';
 
-        if (type === 'tv') {
-            document.getElementById('episodeSection').style.display = 'block';
-            loadEpisodes(1);
-        } else { document.getElementById('episodeSection').style.display = 'none'; }
-        setServer(1);
+            if (type === 'tv') {
+                document.getElementById('episodeSection').style.display = 'block';
+                const sTabs = document.getElementById('seasonTabs');
+                sTabs.innerHTML = (data.seasons || []).filter(s => s.season_number > 0).map(s => 
+                    `<div class="tab-item ${s.season_number==1?'active':''}" onclick="loadEpisodes(${s.season_number}, this)">S${s.season_number}</div>`
+                ).join('');
+                loadEpisodes(1);
+            } else { document.getElementById('episodeSection').style.display = 'none'; }
+            setServer(1);
+        } catch (e) { console.error(e); }
     }
 
-    async function loadEpisodes(sNum) {
+    async function loadEpisodes(sNum, el = null) {
         curS = sNum;
+        if(el) { document.querySelectorAll('#seasonTabs .tab-item').forEach(t => t.classList.remove('active')); el.classList.add('active'); }
         const res = await fetch(`https://api.themoviedb.org/3/tv/${curTMDB}/season/${sNum}?api_key=${API_KEY}&language=id-ID`);
         const data = await res.json();
         allEp = data.episodes || [];
