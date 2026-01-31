@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZelStream - Nonton Film & Series</title>
+    <meta name="description" content="Platform streaming film dan series terlengkap.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#0f1014] text-gray-100 font-sans">
+
+    <nav class="fixed top-0 w-full z-50 bg-[#0f1014]/80 backdrop-blur-md border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-8">
+                <h1 class="text-2xl font-bold text-red-600 tracking-tighter cursor-pointer" onclick="location.reload()">ZELSTREAM</h1>
+                <div class="hidden md:flex gap-6 text-sm font-medium text-gray-400">
+                    <button onclick="app.fetchCategory('trending')" class="hover:text-white transition">Trending</button>
+                    <button onclick="app.fetchCategory('indonesian-movies')" class="hover:text-white transition">Indonesia</button>
+                    <button onclick="app.fetchCategory('kdrama')" class="hover:text-white transition">K-Drama</button>
+                    <button onclick="app.fetchCategory('anime')" class="hover:text-white transition">Anime</button>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative group">
+                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500"></i>
+                    <input type="text" id="searchInput" placeholder="Cari film..." 
+                        class="bg-gray-900 border border-gray-700 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 w-40 md:w-64 transition-all">
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="app-content" class="pt-16 min-h-screen">
+        <section id="hero-container"></section>
+
+        <section class="max-w-7xl mx-auto px-4 py-8">
+            <h2 id="section-title" class="text-2xl font-semibold mb-6">Trending Sekarang</h2>
+            <div id="movie-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                </div>
+            <div id="load-more" class="flex justify-center mt-12 mb-8 hidden">
+                <button class="bg-gray-800 hover:bg-gray-700 px-8 py-2 rounded-full transition">Muat Lebih Banyak</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="detail-modal" class="fixed inset-0 z-[60] hidden bg-black/95 overflow-y-auto">
+        <div id="modal-body" class="min-h-screen p-4 md:p-12">
+            </div>
+        <button onclick="app.closeModal()" class="fixed top-6 right-6 p-2 bg-white/10 rounded-full hover:bg-white/20">
+            <i data-lucide="x"></i>
+        </button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
