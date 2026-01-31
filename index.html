@@ -1,100 +1,59 @@
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZelStream - Streaming Film & Series</title>
+    <title>ZelStream - Direct Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        
-        body { font-family: 'Inter', sans-serif; background-color: #0f1014; }
-        
+        body { background-color: #0f1014; color: #f3f4f6; font-family: sans-serif; }
         .skeleton {
             background: linear-gradient(90deg, #1a1b1e 25%, #27282e 50%, #1a1b1e 75%);
             background-size: 200% 100%;
             animation: loading 1.5s infinite;
         }
-
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .video-container {
-            position: relative;
-            padding-bottom: 56.25%; /* 16:9 */
-            height: 0;
-            overflow: hidden;
-            border-radius: 12px;
-            background: #000;
-        }
-
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #0f1014; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+        @keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
     </style>
 </head>
-<body class="text-gray-100 overflow-x-hidden">
+<body class="overflow-x-hidden">
 
-    <nav class="fixed top-0 w-full z-50 bg-[#0f1014]/90 backdrop-blur-lg border-b border-white/5">
+    <nav class="fixed top-0 w-full z-50 bg-[#0f1014]/95 border-b border-white/5">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-8">
-                <h1 class="text-2xl font-black text-red-600 tracking-tighter cursor-pointer" onclick="location.reload()">ZELSTREAM</h1>
-                <div class="hidden md:flex gap-6 text-sm font-semibold text-gray-400">
-                    <button onclick="app.fetchCategory('trending')" class="hover:text-white transition">Trending</button>
-                    <button onclick="app.fetchCategory('indonesian-movies')" class="hover:text-white transition">Indonesia</button>
-                    <button onclick="app.fetchCategory('kdrama')" class="hover:text-white transition">K-Drama</button>
-                    <button onclick="app.fetchCategory('anime')" class="hover:text-white transition">Anime</button>
-                </div>
+            <h1 class="text-2xl font-black text-red-600 cursor-pointer" onclick="location.reload()">ZELSTREAM</h1>
+            <div class="hidden md:flex gap-6 text-sm font-medium text-gray-400">
+                <button onclick="app.fetchCategory('trending')" class="hover:text-white">Trending</button>
+                <button onclick="app.fetchCategory('indonesian-movies')" class="hover:text-white">Indonesia</button>
+                <button onclick="app.fetchCategory('kdrama')" class="hover:text-white">K-Drama</button>
+                <button onclick="app.fetchCategory('anime')" class="hover:text-white">Anime</button>
             </div>
-            <div class="flex items-center gap-4">
-                <div class="relative group">
-                    <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-500"></i>
-                    <input type="text" id="searchInput" placeholder="Cari judul..." 
-                        class="bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-red-600 w-32 md:w-64 transition-all">
-                </div>
+            <div class="relative">
+                <input type="text" id="searchInput" placeholder="Cari..." class="bg-white/5 border border-white/10 rounded-full py-1.5 px-4 text-sm focus:outline-none w-40 md:w-64">
             </div>
         </div>
     </nav>
 
-    <main class="pt-16">
-        <div id="hero-container"></div>
-
-        <div class="max-w-7xl mx-auto px-4 py-8">
-            <div class="flex items-center justify-between mb-8">
-                <h2 id="section-title" class="text-2xl font-bold">Menampilkan Trending</h2>
-                <div id="status-badge" class="hidden text-xs bg-red-600/20 text-red-500 px-3 py-1 rounded-full animate-pulse">Memuat...</div>
-            </div>
-            
-            <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-                </div>
+    <main class="pt-20 pb-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 id="section-title" class="text-2xl font-bold mb-8">Trending</h2>
+            <div id="movie-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"></div>
         </div>
     </main>
 
-    <div id="detail-modal" class="fixed inset-0 z-[60] hidden bg-black/95 overflow-y-auto backdrop-blur-sm">
-        <div id="modal-body" class="min-h-screen p-4 md:p-12"></div>
-        <button onclick="app.closeModal()" class="fixed top-6 right-6 p-3 bg-white/10 hover:bg-red-600 rounded-full transition-all z-[70]">
+    <div id="detail-modal" class="fixed inset-0 z-[60] hidden bg-black/98 overflow-y-auto">
+        <div id="modal-body" class="min-h-screen p-4 md:p-10"></div>
+        <button onclick="app.closeModal()" class="fixed top-4 right-4 p-2 bg-white/10 rounded-full hover:bg-red-600 transition">
             <i data-lucide="x"></i>
         </button>
     </div>
 
     <script>
         const app = {
-            // Menggunakan Proxy untuk menghindari CORS issue pada GitHub Pages
-            PROXY: "https://api.allorigins.win/raw?url=",
+            // Gunakan HTTPS jika tersedia, jika tidak tetap gunakan HTTP
             API_URL: "https://zeldvorik.ru/apiv2/api.php",
-            
+
             init() {
                 lucide.createIcons();
                 this.setupSearch();
@@ -102,93 +61,55 @@
             },
 
             setupSearch() {
-                const searchInput = document.getElementById('searchInput');
-                let debounceTimer;
-                searchInput.addEventListener('input', (e) => {
-                    clearTimeout(debounceTimer);
-                    debounceTimer = setTimeout(() => {
-                        const q = e.target.value.trim();
-                        if (q.length > 2) this.performSearch(q);
-                        else if (q.length === 0) this.fetchCategory('trending');
+                const input = document.getElementById('searchInput');
+                let timer;
+                input.addEventListener('input', (e) => {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        if (e.target.value.length > 2) this.search(e.target.value);
+                        else if (e.target.value.length === 0) this.fetchCategory('trending');
                     }, 500);
                 });
             },
 
-            async callApi(params) {
-                const badge = document.getElementById('status-badge');
-                badge.classList.remove('hidden');
-                
+            async fetchData(params) {
                 try {
-                    const targetUrl = `${this.API_URL}?${params}`;
-                    const response = await fetch(this.PROXY + encodeURIComponent(targetUrl));
-                    if (!response.ok) throw new Error('Network error');
-                    const data = await response.json();
-                    badge.classList.add('hidden');
-                    return data;
-                } catch (err) {
-                    console.error(err);
-                    badge.innerText = "Error Koneksi";
+                    const response = await fetch(`${this.API_URL}?${params}`);
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return await response.json();
+                } catch (error) {
+                    console.error("Fetch Error:", error);
                     return null;
                 }
             },
 
             async fetchCategory(action) {
                 this.showSkeleton();
-                const data = await this.callApi(`action=${action}&page=1`);
+                const data = await this.fetchData(`action=${action}&page=1`);
                 if (data && data.success) {
                     document.getElementById('section-title').innerText = action.toUpperCase().replace('-', ' ');
                     this.renderGrid(data.items);
-                    if (action === 'trending') this.renderHero(data.items[0]);
                 }
             },
 
-            async performSearch(query) {
+            async search(q) {
                 this.showSkeleton();
-                const data = await this.callApi(`action=search&q=${encodeURIComponent(query)}`);
+                const data = await this.fetchData(`action=search&q=${encodeURIComponent(q)}`);
                 if (data && data.success) {
-                    document.getElementById('section-title').innerText = `Hasil: ${query}`;
+                    document.getElementById('section-title').innerText = `Hasil: ${q}`;
                     this.renderGrid(data.items);
                 }
-            },
-
-            renderHero(item) {
-                if (!item) return;
-                document.getElementById('hero-container').innerHTML = `
-                    <div class="relative h-[60vh] md:h-[80vh] w-full flex items-end pb-12 px-4 md:px-12">
-                        <img src="${item.poster}" class="absolute inset-0 w-full h-full object-cover opacity-30 object-top">
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#0f1014] via-[#0f1014]/40 to-transparent"></div>
-                        <div class="relative max-w-3xl">
-                            <h2 class="text-4xl md:text-7xl font-black mb-4 leading-none">${item.title}</h2>
-                            <div class="flex items-center gap-4 mb-6 font-semibold">
-                                <span class="text-yellow-500 flex items-center gap-1"><i data-lucide="star" class="w-4 h-4 fill-yellow-500"></i> ${item.rating}</span>
-                                <span class="text-gray-400">${item.year}</span>
-                                <span class="bg-red-600 px-2 py-0.5 rounded text-xs">TRENDING</span>
-                            </div>
-                            <button onclick="app.showDetail('${item.detailPath}')" class="bg-white text-black px-8 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition">
-                                <i data-lucide="play" class="fill-black"></i> Lihat Detail
-                            </button>
-                        </div>
-                    </div>
-                `;
-                lucide.createIcons();
             },
 
             renderGrid(items) {
                 const grid = document.getElementById('movie-grid');
-                if (!items || items.length === 0) {
-                    grid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-20">Tidak ada konten ditemukan.</p>`;
-                    return;
-                }
                 grid.innerHTML = items.map(item => `
                     <div class="group cursor-pointer" onclick="app.showDetail('${item.detailPath}')">
-                        <div class="relative aspect-[2/3] rounded-xl overflow-hidden mb-3 shadow-lg ring-1 ring-white/10 group-hover:ring-red-600 transition-all">
-                            <img src="${item.poster}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
-                                <span class="text-xs bg-yellow-500 text-black font-bold w-fit px-2 py-0.5 rounded">★ ${item.rating}</span>
-                            </div>
+                        <div class="aspect-[2/3] rounded-lg overflow-hidden bg-gray-800 mb-2 ring-1 ring-white/5 group-hover:ring-red-600 transition">
+                            <img src="${item.poster}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" loading="lazy">
                         </div>
-                        <h3 class="font-semibold text-sm line-clamp-2 group-hover:text-red-500 transition-colors">${item.title}</h3>
-                        <p class="text-xs text-gray-500 mt-1">${item.year} • ${item.type}</p>
+                        <h3 class="text-sm font-semibold truncate">${item.title}</h3>
+                        <p class="text-xs text-gray-500">${item.year} • ★${item.rating}</p>
                     </div>
                 `).join('');
             },
@@ -198,51 +119,46 @@
                 const body = document.getElementById('modal-body');
                 modal.classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
-                body.innerHTML = `<div class="flex justify-center items-center h-screen"><div class="skeleton w-16 h-16 rounded-full"></div></div>`;
+                body.innerHTML = `<div class="h-screen flex items-center justify-center text-red-600 animate-pulse">Memuat Detail...</div>`;
 
-                const data = await this.callApi(`action=detail&detailPath=${encodeURIComponent(path)}`);
-                
+                // PERBAIKAN: Bersihkan path jika mengandung slash ganda
+                const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+                const data = await this.fetchData(`action=detail&detailPath=${cleanPath}`);
+
                 if (data && data.success) {
-                    const item = data.item;
+                    const it = data.item;
                     body.innerHTML = `
-                        <div class="max-w-6xl mx-auto pt-10">
-                            <div class="grid lg:grid-cols-3 gap-10 mb-12">
-                                <div class="lg:col-span-1">
-                                    <img src="${item.poster}" class="w-full rounded-2xl shadow-2xl ring-1 ring-white/10">
-                                </div>
-                                <div class="lg:col-span-2">
-                                    <h2 class="text-4xl md:text-6xl font-black mb-4">${item.title}</h2>
-                                    <div class="flex gap-4 mb-6 text-gray-400">
-                                        <span class="text-yellow-500 font-bold">★ ${item.rating}</span>
-                                        <span>${item.year}</span>
-                                        <span class="uppercase tracking-widest text-xs border border-white/20 px-2 py-1 rounded">${item.type}</span>
+                        <div class="max-w-5xl mx-auto pt-8">
+                            <div class="flex flex-col md:flex-row gap-8 mb-10">
+                                <img src="${it.poster}" class="w-full md:w-64 rounded-xl shadow-xl">
+                                <div>
+                                    <h2 class="text-3xl md:text-5xl font-black mb-2">${it.title}</h2>
+                                    <p class="text-yellow-500 font-bold mb-4">Rating: ★ ${it.rating} | ${it.year}</p>
+                                    <p class="text-gray-400 text-sm leading-relaxed mb-6">${it.description || 'Tidak ada deskripsi.'}</p>
+                                    <div class="video-wrapper">
+                                        <iframe src="${it.playerUrl}" allowfullscreen></iframe>
                                     </div>
-                                    <p class="text-lg text-gray-300 mb-8 leading-relaxed">${item.description || 'Sinopsis tidak tersedia untuk judul ini.'}</p>
-                                    
-                                    <div class="video-container shadow-2xl ring-1 ring-white/10 mb-8">
-                                        <iframe src="${item.playerUrl}" allowfullscreen></iframe>
-                                    </div>
-
-                                    ${item.seasons ? this.renderEpisodes(item.seasons) : ''}
                                 </div>
                             </div>
-                        </div>
-                    `;
+                            ${it.seasons ? this.renderSeasons(it.seasons) : ''}
+                        </div>`;
                     lucide.createIcons();
                 } else {
-                    body.innerHTML = `<div class="text-center py-40"><h2 class="text-2xl font-bold">Gagal memuat detail.</h2><p class="text-gray-500">Coba lagi nanti atau periksa koneksi Anda.</p></div>`;
+                    body.innerHTML = `<div class="h-screen flex flex-col items-center justify-center">
+                        <p class="text-xl font-bold">Gagal memuat detail konten.</p>
+                        <p class="text-gray-500 text-sm mt-2 text-center">API mungkin sedang sibuk atau URL tidak valid.<br>Path: ${path}</p>
+                        <button onclick="app.closeModal()" class="mt-6 bg-red-600 px-6 py-2 rounded-full text-sm">Kembali</button>
+                    </div>`;
                 }
             },
 
-            renderEpisodes(seasons) {
+            renderSeasons(seasons) {
                 return seasons.map(s => `
                     <div class="mb-8">
-                        <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-                            <i data-lucide="layers" class="text-red-600"></i> ${s.seasonName}
-                        </h3>
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <h4 class="text-lg font-bold mb-4 text-red-500">${s.seasonName}</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
                             ${s.episodes.map(ep => `
-                                <button onclick="app.playEpisode('${ep.url}')" class="bg-white/5 hover:bg-red-600 border border-white/10 p-3 rounded-xl text-sm transition-all text-left">
+                                <button onclick="app.changePlayer('${ep.url}')" class="bg-white/5 hover:bg-red-600 p-2 rounded text-xs truncate transition">
                                     ${ep.episodeName}
                                 </button>
                             `).join('')}
@@ -251,7 +167,7 @@
                 `).join('');
             },
 
-            playEpisode(url) {
+            changePlayer(url) {
                 const frame = document.querySelector('iframe');
                 frame.src = url;
                 frame.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -260,22 +176,16 @@
             closeModal() {
                 document.getElementById('detail-modal').classList.add('hidden');
                 document.body.style.overflow = 'auto';
-                document.getElementById('modal-body').innerHTML = '';
             },
 
             showSkeleton() {
-                const grid = document.getElementById('movie-grid');
-                grid.innerHTML = Array(10).fill(0).map(() => `
-                    <div>
-                        <div class="aspect-[2/3] rounded-xl skeleton mb-3"></div>
-                        <div class="h-4 w-3/4 skeleton rounded mb-2"></div>
-                        <div class="h-3 w-1/2 skeleton rounded"></div>
-                    </div>
+                document.getElementById('movie-grid').innerHTML = Array(10).fill(0).map(() => `
+                    <div><div class="aspect-[2/3] rounded-lg skeleton mb-2"></div><div class="h-3 w-3/4 skeleton rounded"></div></div>
                 `).join('');
             }
         };
 
-        document.addEventListener('DOMContentLoaded', () => app.init());
+        app.init();
     </script>
 </body>
 </html>
